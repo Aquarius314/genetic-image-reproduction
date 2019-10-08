@@ -57,9 +57,16 @@ public class Main extends Application {
             {
                 calculationsLoop();
 //                if (algo.getBestGenome().getFitness()/100 >= fitnessCounter * 1000) { // when fitness hits 1000, 2000, 3000 etc
-    //                fitnessCounter = algo.getBestGenome().getFitness()/100000 + 1;
+//                    fitnessCounter = algo.getBestGenome().getFitness()/100000 + 1;
+
+
                 if (System.currentTimeMillis() - stepTimer > 1000*Properties.SECONDS_BETWEEN_PICTURES) { // when time passes
                     stepTimer = System.currentTimeMillis();
+                    saveImageToFile();
+                }
+
+                if (algo.iterations % 200 == 1) {
+
                     renderLoop();
 
                     long cur = System.currentTimeMillis();
@@ -75,7 +82,6 @@ public class Main extends Application {
                     String time = hours + ":" + minutes + ":" + seconds;
                     stage.setTitle("Iter:" + algo.iterations + " fit:" + algo.getBestGenome().getFitness()/100 + " pop:" + Properties.INITIAL_POPULATION_SIZE + " rec:" + algo.getBestGenome().getRectangles().size() + " t:" + time);
 
-                    saveImageToFile();
                 }
             }
         }.start();

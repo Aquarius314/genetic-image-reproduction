@@ -1,18 +1,52 @@
 package genetic;
 
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 
-import java.util.Random;
 
-public class Dot extends Rectangle {
 
-    public Dot(double x, double y, double width, double height) {
-        super(x, y, width, height);
-        Random random = new Random();
+public class Dot {
+
+    private int x, y, width, height;
+
+    public Dot(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
     public Dot copy() {
         return new Dot(getX(), getY(), getWidth(), getHeight());
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 }

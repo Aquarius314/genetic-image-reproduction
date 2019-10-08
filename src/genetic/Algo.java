@@ -167,32 +167,25 @@ public class Algo {
         return Math.abs(rnd.nextInt());
     }
 
-    // -12143319
-
     private void calculateFitnesses() {
         int bestFitness = -1000000000;
         for (Genome g : population) {
             int fitness = FitnessCalculator.calculateFitness(g);
-            g.setFitness(fitness);
             if (fitness > bestFitness) {
                 bestFitness = fitness;
                 bestGenome = g;
             }
         }
-//        System.out.println("Best fitness " + Properties.MODE + " " + bestFitness);
     }
 
     private void selection() {
-        if (Properties.MODE.equals("SELECTION")) {
-            population.addAll(oldPopulation);
-            population.sort(Comparator.comparingInt(Genome::getFitness));
-            int populationSize = population.size();
-            for (int i = 0; i < populationSize / 2; i++) {
-                population.remove(0);
-//                population.add(new Genome());
-            }
-            Collections.shuffle(population);
+        population.addAll(oldPopulation);
+        population.sort(Comparator.comparingInt(Genome::getFitness));
+        int populationSize = population.size();
+        for (int i = 0; i < populationSize / 2; i++) {
+            population.remove(0);
         }
+        Collections.shuffle(population);
     }
 
     public Genome getBestGenome() {

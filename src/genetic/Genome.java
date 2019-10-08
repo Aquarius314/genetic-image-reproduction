@@ -4,7 +4,6 @@ package genetic;
 
 
 import core.Properties;
-import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,9 +12,11 @@ import java.util.Random;
 public class Genome {
 
     private static Random rnd = new Random();
+    private ArrayList<Dot> freshRectangles;
     private ArrayList<Dot> rectangles;
-    private int fitness;
-    private FitnessCalculator calculator = new FitnessCalculator();
+    private ArrayList<Dot> deadRectangles;
+    private int fitness = Properties.WIDTH * Properties.HEIGHT * 100;
+    double[][] createdImage = new double[Properties.WIDTH][Properties.HEIGHT];
 
     public Genome() {
         generateInitialRectangles();
@@ -23,11 +24,57 @@ public class Genome {
 
     public Genome copy() {
         Genome copy = new Genome();
-        copy.rectangles.clear();
-        for (Dot r : rectangles) {
-            copy.rectangles.add(new Dot(r.getX(), r.getY(), r.getWidth(), r.getHeight()));
-        }
+
+        copy.freshRectangles = new ArrayList<>();
+        copy.rectangles = copyRectsCollection(this.rectangles);
+        copy.deadRectangles = new ArrayList<>();
+
+        copy.rectangles.addAll(freshRectangles);
+        copy.rectangles.removeAll(deadRectangles); // ALERT zmieniać to czy nie?
+
         copy.setFitness(fitness);
+        copy.createdImage = this.createdImage.clone();
+        return copy;
+    }
+
+    public void prepareImage() {
+//        double[][] result = new double[Properties.WIDTH][Properties.HEIGHT];
+        applyRects(freshRectangles, 0.2);
+        applyRects(deadRectangles, -0.2);
+//        return result;
+    }
+
+    public void cleanRectangles() {
+        rectangles.addAll(freshRectangles);
+        freshRectangles.clear();
+        rectangles.removeAll(deadRectangles);
+        deadRectangles.clear();
+    }
+
+    private void applyRects(ArrayList<Dot> rects, double value) {
+        for (Dot d : rects) {
+            int x = d.getX();
+            int y = d.getY();
+            int width = d.getWidth();
+            int height = d.getHeight();
+            for (int i = x; i < x + width && i < Properties.WIDTH; i++) {
+                for (int j = y; j < y + height && j < Properties.HEIGHT; j++) {
+                    createdImage[i][j] += value;
+                    if (createdImage[i][j] < 0.0) {
+                        createdImage[i][j] = 0;
+                    } else if (createdImage[i][j] > 1.0) {
+                        createdImage[i][j] = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    private ArrayList<Dot> copyRectsCollection(ArrayList<Dot> rects) {
+        ArrayList<Dot> copy = new ArrayList<>();
+        for (Dot r : rects) {
+            copy.add(r.copy());
+        }
         return copy;
     }
 
@@ -35,33 +82,28 @@ public class Genome {
         if (shouldChangeSize()) {
             if (rnd.nextBoolean()) {
                 // create new one
-                rectangles.add(randomRectangle());
+                freshRectangles.add(randomRectangle());
             } else {
                 // delete one
                 if (rectangles.size() > 10) {
                     Collections.shuffle(rectangles);
-                    rectangles.remove(0);
+                    deadRectangles.add(rectangles.get(0));
                 }
             }
         }
-        for (Rectangle r : rectangles) {
-            if (shouldMutate()) {
-//                double width = r.getWidth();
-//                double height = r.getHeight();
-                double x = r.getX();
-                double y = r.getY();
-
-//                r.setWidth(mutateFeature(width));
-//                r.setHeight(mutateFeature(height));
-                r.setX(mutateFeature(x));
-                r.setY(mutateFeature(y));
+        if (Properties.MUTATIONS_SIZE > 1) {
+            for (Dot r : rectangles) {
+                if (shouldMutate()) {
+                    r.setX(mutateFeature(r.getX()));
+                    r.setY(mutateFeature(r.getY()));
+                }
             }
         }
     }
 
-    private double mutateFeature(double feature) {
+    private int mutateFeature(int feature) {
         int mutation = randomInt() % Properties.MUTATIONS_SIZE;
-        double result;
+        int result;
         if (rnd.nextBoolean()) {
             result = feature + mutation;
         } else {
@@ -81,13 +123,13 @@ public class Genome {
     }
 
     private void generateInitialRectangles() {
-        rectangles = new ArrayList<>();
-
-        Random rnd = new Random();
+        freshRectangles = new ArrayList<>();
         for (int i = 0; i < Properties.INITIAL_RECTANGLES_QUANTITY; i++) {
-
-            rectangles.add(randomRectangle());
+            freshRectangles.add(randomRectangle());
         }
+
+        rectangles = new ArrayList<>();
+        deadRectangles = new ArrayList<>();
     }
 
     private Dot randomRectangle() {
@@ -118,15 +160,18 @@ public class Genome {
         this.rectangles = rectangles;
     }
 
+    public ArrayList<Dot> getChangedRectangles() {
+        ArrayList<Dot> changedRectangles = new ArrayList<>();
+        changedRectangles.addAll(freshRectangles);
+        changedRectangles.addAll(deadRectangles);
+        return changedRectangles;
+    }
+
     public int getFitness() {
         return fitness;
     }
 
     public void setFitness(int fitness) {
         this.fitness = fitness;
-    }
-
-    public FitnessCalculator getFitnessCalculator() {
-        return calculator;
     }
 }
