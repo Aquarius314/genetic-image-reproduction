@@ -63,7 +63,7 @@ public class Displayer {
         ArrayList<Dot> dots = best.getRectangles();
         for (int i = 0; i < best.getRectangles().size(); i++) {
             for (int j = i + 1; j < best.getRectangles().size(); j++) {
-                if (rectanglesDistance(dots.get(i), dots.get(j)) < 10) {
+                if (rectanglesDistance(dots.get(i), dots.get(j)) < 5) {
                     double x1 = dots.get(i).getX() + dots.get(i).getWidth()/2;
                     double x2 = dots.get(j).getX() + dots.get(j).getWidth()/2;
                     double y1 = dots.get(i).getY() + dots.get(i).getHeight()/2;

@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
-import static genetic.FitnessCalculator.image;
-
 public class Algo {
 
     private Genome bestGenome = new Genome();
@@ -42,10 +40,12 @@ public class Algo {
 
     public Algo() {
         generateInitialPopulation();
-        try {
-            writer = new BufferedWriter(new FileWriter("data-pop" + Properties.INITIAL_POPULATION_SIZE + ".txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (Properties.SAVE_DATA) {
+            try {
+                writer = new BufferedWriter(new FileWriter("data-mut" + Properties.MUTATIONS_MODE + ".txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -57,15 +57,17 @@ public class Algo {
         calculateFitnesses();
         selection();
 
-        if (System.currentTimeMillis() - dataTime > 1000 * Properties.SECONDS_BETWEEN_DATA_COLLECTION) {
+        if (Properties.SAVE_DATA && System.currentTimeMillis() - dataTime > 1000 * Properties.SECONDS_BETWEEN_DATA_COLLECTION) {
             dataTime = System.currentTimeMillis();
             collectData();
         }
 
         if (limitMinutes(Properties.EXPERIMENT_SINGLE_CASE_TIME)) {
             experimentCounter++;
-            System.out.println("Iter:" + iterations + " Fit:" + bestGenome.getFitness()/100 + " Pop:" + Properties.INITIAL_POPULATION_SIZE);
-            Properties.INITIAL_POPULATION_SIZE *= 2;
+            System.out.println("Iter:" + iterations + " Fit:" + bestGenome.getFitness()/100 + " Mut:" + Properties.MUTATIONS_MODE);
+
+            Properties.MUTATIONS_MODE += 1;
+
             try {
                 writer.close();
             } catch (IOException e) {
@@ -94,7 +96,7 @@ public class Algo {
 
     private void reset() {
         try {
-            writer = new BufferedWriter(new FileWriter("data-pop" + Properties.INITIAL_POPULATION_SIZE + ".txt"));
+            writer = new BufferedWriter(new FileWriter("data-mut" + Properties.MUTATIONS_MODE + ".txt"));
         } catch (IOException e) {
             e.printStackTrace();
         }

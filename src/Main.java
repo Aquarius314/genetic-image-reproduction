@@ -56,16 +56,12 @@ public class Main extends Application {
             public void handle(long currentNanoTime)
             {
                 calculationsLoop();
+
+
+
 //                if (algo.getBestGenome().getFitness()/100 >= fitnessCounter * 1000) { // when fitness hits 1000, 2000, 3000 etc
 //                    fitnessCounter = algo.getBestGenome().getFitness()/100000 + 1;
-
-
-                if (System.currentTimeMillis() - stepTimer > 1000*Properties.SECONDS_BETWEEN_PICTURES) { // when time passes
-                    stepTimer = System.currentTimeMillis();
-                    saveImageToFile();
-                }
-
-                if (algo.iterations % 200 == 1) {
+                if (algo.iterations % 500 == 0) {
 
                     renderLoop();
 
@@ -82,6 +78,11 @@ public class Main extends Application {
                     String time = hours + ":" + minutes + ":" + seconds;
                     stage.setTitle("Iter:" + algo.iterations + " fit:" + algo.getBestGenome().getFitness()/100 + " pop:" + Properties.INITIAL_POPULATION_SIZE + " rec:" + algo.getBestGenome().getRectangles().size() + " t:" + time);
 
+                }
+
+                if (System.currentTimeMillis() - stepTimer > 1000*Properties.SECONDS_BETWEEN_PICTURES) { // when time passes
+                    stepTimer = System.currentTimeMillis();
+                    saveImageToFile();
                 }
             }
         }.start();
@@ -104,8 +105,8 @@ public class Main extends Application {
 
     private void saveImageToFile() {
         algo.nr++;
-        int param = Properties.INITIAL_POPULATION_SIZE;
-        File file = new File("testy/pop" + param + "/" + algo.nr + " fit: " + algo.getBestGenome().getFitness()/100 + ".png");
+        int param = Properties.MUTATIONS_MODE;
+        File file = new File("testy/mut" + param + "/" + algo.nr + " fit: " + algo.getBestGenome().getFitness()/100 + ".png");
         try {
             WritableImage writableImage = new WritableImage(Properties.WIDTH, Properties.HEIGHT);
             canvas.snapshot(null, writableImage);

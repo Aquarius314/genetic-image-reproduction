@@ -78,8 +78,9 @@ public class Genome {
         return copy;
     }
 
-    public void mutate() {
-        if (shouldChangeSize()) {
+    private void mutate1() {
+        // standard, good old mutations (rare, 1 rect +/-)
+        if (shouldChangeSize(1)) {
             if (rnd.nextBoolean()) {
                 // create new one
                 freshRectangles.add(randomRectangle());
@@ -91,14 +92,66 @@ public class Genome {
                 }
             }
         }
-        if (Properties.MUTATIONS_SIZE > 1) {
-            for (Dot r : rectangles) {
-                if (shouldMutate()) {
-                    r.setX(mutateFeature(r.getX()));
-                    r.setY(mutateFeature(r.getY()));
+    }
+
+    private void mutate2() {
+        // standard but 1-1% rects +/-
+        if (shouldChangeSize(1)) {
+            int onePercent = Math.max(rectangles.size()/100, 1);
+            int quantity = randomInt() % onePercent;
+            if (rnd.nextBoolean()) {
+                for (int i = 0; i < quantity; i++) {
+                    freshRectangles.add(randomRectangle());
+                }
+            } else {
+                for (int i = 0; i < quantity; i++) {
+                    if (rectangles.size() - deadRectangles.size() > 10) {
+                        Collections.shuffle(rectangles);
+                        deadRectangles.add(rectangles.get(0));
+                    }
                 }
             }
         }
+    }
+
+    private void mutate3() {
+        // standard but higher probability of mutations
+        if (shouldChangeSize(2)) {
+            if (rnd.nextBoolean()) {
+                // create new one
+                freshRectangles.add(randomRectangle());
+            } else {
+                // delete one
+                if (rectangles.size() > 10) {
+                    Collections.shuffle(rectangles);
+                    deadRectangles.add(rectangles.get(0));
+                }
+            }
+        }
+    }
+
+    private void mutate4() {
+        // no mutations at all!
+    }
+
+    public void mutate() {
+        switch (Properties.MUTATIONS_MODE) {
+            case 1:
+                mutate1();
+                break;
+            case 2:
+                mutate2();
+                break;
+            case 3:
+                mutate3();
+                break;
+            case 4:
+                mutate4();
+                break;
+                default:
+                    System.out.println("Invalid MUTATIONS MODE! (" + Properties.MUTATIONS_MODE + " is not recognized)");
+        }
+
     }
 
     private int mutateFeature(int feature) {
@@ -114,12 +167,12 @@ public class Genome {
         return result;
     }
 
-    private boolean shouldMutate() {
-        return randomInt() % 100 < Properties.MUTATIONS_CHANCE;
-    }
+//    private boolean shouldMutate() {
+//        return randomInt() % 100 < Properties.MUTATIONS_CHANCE;
+//    }
 
-    private boolean shouldChangeSize() {
-        return randomInt() % 100 < Properties.MUTATIONS_DISAPPEAR_CHANCE;
+    private boolean shouldChangeSize(int probabilityFactor) {
+        return randomInt() % 100 < Properties.MUTATIONS_DISAPPEAR_CHANCE * probabilityFactor;
     }
 
     private void generateInitialRectangles() {
